@@ -3,6 +3,7 @@ server:
 
 proxy:
   servers: http://localhost:8801,http://localhost:8802,http://localhost:8803
+  weight: 3,2,1
 
 netty:
   group:
