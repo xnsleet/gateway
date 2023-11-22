@@ -8,25 +8,34 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Arrays;
 
-public class HttpInboundServer {
+/**
+ * 服务启动器
+ */
+@Component
+public class HttpInboundServer{
 
-    private List<String> proxyServer;
+    @Value("${netty.group.boss}")
+    private int bossGroupNum;
 
-    private int port;
+    @Value("${netty.group.worker}")
+    private int workerGroupNum;
 
-    public HttpInboundServer(int port, List<String> proxyServer) {
-        this.port = port;
-        this.proxyServer = proxyServer;
-    }
+    @Value("${server.port}")
+    private int proxyPort;
 
-    public void run() throws InterruptedException {
+    @Value("${proxy.servers}")
+    private String proxyServers;
 
-        NioEventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        NioEventLoopGroup workerGroup = new NioEventLoopGroup(16);
-
+    @PostConstruct
+    public void init(){
+        NioEventLoopGroup bossGroup = new NioEventLoopGroup(bossGroupNum);
+        NioEventLoopGroup workerGroup = new NioEventLoopGroup(workerGroupNum);
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.option(ChannelOption.SO_BACKLOG, 128)
@@ -40,10 +49,12 @@ public class HttpInboundServer {
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.DEBUG))
-                    .childHandler(new HttpInboundInitializer(proxyServer));
+                    .childHandler(new HttpInboundInitializer(Arrays.asList(proxyServers.split(","))));
 
-            Channel channel = bootstrap.bind(port).sync().channel();
+            Channel channel = bootstrap.bind(proxyPort).sync().channel();
             channel.closeFuture().sync();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

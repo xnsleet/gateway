@@ -24,6 +24,9 @@ import java.util.concurrent.TimeUnit;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
 
+/**
+ * 请求出站处理器
+ */
 public class HttpOutboundHandler {
 
     private CloseableHttpAsyncClient httpAsyncClient;
@@ -62,7 +65,7 @@ public class HttpOutboundHandler {
 
     public void handler(final FullHttpRequest fullRequest, final ChannelHandlerContext ctx, HttpRequestFilter requestFilter) {
         String backedUrl = randomHttpEndPointRouter.router(this.backedUrls);
-        String url = backedUrl + fullRequest.getUri();
+        String url = backedUrl + fullRequest.uri();
         requestFilter.filter(fullRequest, ctx);
         proxyService.submit(() -> fetchGet(fullRequest, ctx, url));
     }

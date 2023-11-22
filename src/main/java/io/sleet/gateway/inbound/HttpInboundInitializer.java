@@ -8,6 +8,9 @@ import io.netty.handler.codec.http.HttpServerCodec;
 
 import java.util.List;
 
+/**
+ * 请求入站初始化
+ */
 public class HttpInboundInitializer
         extends ChannelInitializer<SocketChannel> {
 

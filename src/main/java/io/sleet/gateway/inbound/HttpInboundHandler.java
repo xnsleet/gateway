@@ -9,6 +9,9 @@ import io.sleet.gateway.outbound.HttpOutboundHandler;
 
 import java.util.List;
 
+/**
+ * 请求入站处理器
+ */
 public class HttpInboundHandler
         extends ChannelInboundHandlerAdapter {
 
