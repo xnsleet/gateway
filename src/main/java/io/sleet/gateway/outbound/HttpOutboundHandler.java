@@ -6,7 +6,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
 import io.sleet.gateway.fillter.HeaderHttpResponseFilter;
 import io.sleet.gateway.fillter.HttpRequestFilter;
-import io.sleet.gateway.router.strategy.HttpEndPointRouterChoose;
+import io.sleet.gateway.router.HttpEndPointRouterChoose;
+import io.sleet.gateway.router.HttpEndPointRouterStrategy;
 import jakarta.annotation.Resource;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -17,10 +18,13 @@ import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -34,15 +38,15 @@ import static io.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
 @Component
 public class HttpOutboundHandler {
 
-    @Value("${router.choose.type}")
-    private String routerChooseType;
-
     @Value("${proxy.servers}")
     private String proxyServers;
 
-    private CloseableHttpAsyncClient httpAsyncClient;
+    @Value("${router.choose.type}")
+    private String routerChooseType;
 
     private ExecutorService proxyService;
+
+    private CloseableHttpAsyncClient httpAsyncClient;
 
     @Resource
     private HeaderHttpResponseFilter responseFilter;
@@ -75,7 +79,8 @@ public class HttpOutboundHandler {
 
     public void handler(final FullHttpRequest fullRequest, final ChannelHandlerContext ctx, HttpRequestFilter requestFilter) {
         List<String> urlList = Arrays.asList(proxyServers.split(","));
-        String backedUrl = httpEndPointRouterChoose.choose(routerChooseType).router(urlList);
+        HttpEndPointRouterStrategy httpEndPointRouterStrategy = httpEndPointRouterChoose.choose(routerChooseType);
+        String backedUrl = httpEndPointRouterStrategy.router(urlList);
         String url = backedUrl + fullRequest.uri();
         requestFilter.filter(fullRequest, ctx);
         proxyService.submit(() -> fetchGet(fullRequest, ctx, url));
@@ -108,7 +113,7 @@ public class HttpOutboundHandler {
         });
     }
 
-    private void handleResponse(final FullHttpRequest fullRequest,final  ChannelHandlerContext ctx,final  HttpResponse endpointResponse) {
+    private void handleResponse(final FullHttpRequest fullRequest, final ChannelHandlerContext ctx, final HttpResponse endpointResponse) {
         FullHttpResponse fullResponse = null;
         try {
             byte[] byteArray = EntityUtils.toByteArray(endpointResponse.getEntity());

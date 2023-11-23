@@ -12,15 +12,16 @@ import org.springframework.stereotype.Component;
 /**
  * 请求入站处理器
  */
-@Component
 public class HttpInboundHandler
         extends ChannelInboundHandlerAdapter {
-重构
-    @Resource
+
     private HttpOutboundHandler outboundHandler;
 
-    @Resource
-    private HeaderHttpRequestFilter requestFilter;
+    private HeaderHttpRequestFilter requestFilter = new HeaderHttpRequestFilter();
+
+    public HttpInboundHandler(HttpOutboundHandler outboundHandler){
+        this.outboundHandler = outboundHandler;
+    }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {

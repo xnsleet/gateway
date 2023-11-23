@@ -1,7 +1,6 @@
 package io.sleet.gateway.router;
 
 import io.sleet.gateway.constans.RouterConstants;
-import io.sleet.gateway.router.strategy.HttpEndPointRouterStrategy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

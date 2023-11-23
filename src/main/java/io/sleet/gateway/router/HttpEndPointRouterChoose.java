@@ -1,12 +1,15 @@
-package io.sleet.gateway.router.strategy;
+package io.sleet.gateway.router;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-
+import java.util.HashMap;
 import java.util.Map;
+
+import static cn.hutool.poi.excel.sax.AttributeName.t;
 
 /**
  * @author sleet
@@ -16,13 +19,18 @@ import java.util.Map;
 public class HttpEndPointRouterChoose
         implements ApplicationContextAware, InitializingBean {
 
+    @Value("${netty.group.boss}")
+    public int bossGroupNum;
     private ApplicationContext applicationContext;
 
-    private Map<String, HttpEndPointRouterStrategy> map;
+    private Map<String, HttpEndPointRouterStrategy> strategyMap = new HashMap<>();
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.map = applicationContext.getBeansOfType(HttpEndPointRouterStrategy.class);
+        Map<String, HttpEndPointRouterStrategy> beansOfType = applicationContext.getBeansOfType(HttpEndPointRouterStrategy.class);
+        beansOfType.forEach((key,bean)->{
+            this.strategyMap.put(bean.type(),bean);
+        });
     }
 
     @Override
@@ -31,6 +39,6 @@ public class HttpEndPointRouterChoose
     }
 
     public HttpEndPointRouterStrategy choose(String name) {
-        return this.map.get(name);
+        return this.strategyMap.get(name);
     }
 }

@@ -1,4 +1,4 @@
-package io.sleet.gateway.router.strategy;
+package io.sleet.gateway.router;
 
 import java.util.List;
 

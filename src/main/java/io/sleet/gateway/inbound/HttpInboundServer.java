@@ -10,8 +10,15 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+
+import java.util.Properties;
 
 /**
  * 服务启动器
@@ -20,19 +27,19 @@ import org.springframework.stereotype.Component;
 public class HttpInboundServer{
 
     @Value("${netty.group.boss}")
-    private int bossGroupNum;
+    public int bossGroupNum;
 
     @Value("${netty.group.worker}")
-    private int workerGroupNum;
+    public int workerGroupNum;
 
     @Value("${server.port}")
-    private int proxyPort;
+    public int serverPort;
 
     @Resource
-    private HttpInboundInitializer httpInboundInitializer;
+    HttpInboundInitializer httpInboundInitializer;
 
     @PostConstruct
-    public void init(){
+    public void init() throws BeansException {
         NioEventLoopGroup bossGroup = new NioEventLoopGroup(bossGroupNum);
         NioEventLoopGroup workerGroup = new NioEventLoopGroup(workerGroupNum);
         try {
@@ -50,7 +57,7 @@ public class HttpInboundServer{
                     .handler(new LoggingHandler(LogLevel.DEBUG))
                     .childHandler(httpInboundInitializer);
 
-            Channel channel = bootstrap.bind(proxyPort).sync().channel();
+            Channel channel = bootstrap.bind(serverPort).sync().channel();
             channel.closeFuture().sync();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

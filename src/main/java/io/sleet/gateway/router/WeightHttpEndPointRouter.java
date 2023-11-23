@@ -1,12 +1,13 @@
 package io.sleet.gateway.router;
 
 import io.sleet.gateway.constans.RouterConstants;
-import io.sleet.gateway.router.strategy.HttpEndPointRouterStrategy;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 
 /**
@@ -16,9 +17,6 @@ import java.util.Random;
 public class WeightHttpEndPointRouter
         implements HttpEndPointRouterStrategy {
 
-    @Value("${proxy.weight}")
-    private String weight;
-
     @Override
     public String type() {
         return RouterConstants.WEIGHT;
@@ -26,6 +24,11 @@ public class WeightHttpEndPointRouter
 
     @Override
     public String router(List<String> urls) {
+        YamlPropertiesFactoryBean yamlProFb = new YamlPropertiesFactoryBean();
+        yamlProFb.setResources(new ClassPathResource("application.yml"));
+        Properties properties = yamlProFb.getObject();
+        assert properties != null;
+        String weight = (String) properties.get("proxy.weight");
         String[] splitWeight = weight.split(",");
         List<String> urlList = new ArrayList<>();
         for (int i = 0; i < splitWeight.length; i++) {
