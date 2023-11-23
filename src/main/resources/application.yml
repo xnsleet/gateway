@@ -9,3 +9,7 @@ netty:
   group:
     boss: 1
     worker: 16
+
+router:
+  choose:
+    type: weight

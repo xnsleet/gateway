@@ -9,10 +9,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
 
 /**
  * 服务启动器
@@ -29,8 +28,8 @@ public class HttpInboundServer{
     @Value("${server.port}")
     private int proxyPort;
 
-    @Value("${proxy.servers}")
-    private String proxyServers;
+    @Resource
+    private HttpInboundInitializer httpInboundInitializer;
 
     @PostConstruct
     public void init(){
@@ -49,7 +48,7 @@ public class HttpInboundServer{
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.DEBUG))
-                    .childHandler(new HttpInboundInitializer(Arrays.asList(proxyServers.split(","))));
+                    .childHandler(httpInboundInitializer);
 
             Channel channel = bootstrap.bind(proxyPort).sync().channel();
             channel.closeFuture().sync();

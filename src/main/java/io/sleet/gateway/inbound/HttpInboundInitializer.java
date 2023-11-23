@@ -5,26 +5,24 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
-
-import java.util.List;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
 /**
  * 请求入站初始化
  */
+@Component
 public class HttpInboundInitializer
         extends ChannelInitializer<SocketChannel> {
 
-    private List<String> proxyServer;
-
-    public HttpInboundInitializer(List<String> proxyServer) {
-        this.proxyServer = proxyServer;
-    }
+    @Resource
+    private HttpInboundHandler httpInboundHandler;
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast(new HttpServerCodec());
         pipeline.addLast(new HttpObjectAggregator(1024 * 1024));
-        pipeline.addLast(new HttpInboundHandler(proxyServer));
+        pipeline.addLast(httpInboundHandler);
     }
 }

@@ -6,26 +6,21 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.ReferenceCountUtil;
 import io.sleet.gateway.fillter.HeaderHttpRequestFilter;
 import io.sleet.gateway.outbound.HttpOutboundHandler;
-
-import java.util.List;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
 /**
  * 请求入站处理器
  */
+@Component
 public class HttpInboundHandler
         extends ChannelInboundHandlerAdapter {
-
-    private List<String> proxyServer;
-
+重构
+    @Resource
     private HttpOutboundHandler outboundHandler;
 
-    private HeaderHttpRequestFilter requestFilter = new HeaderHttpRequestFilter();
-
-
-    public HttpInboundHandler(List<String> proxyServer) {
-        this.proxyServer = proxyServer;
-        this.outboundHandler = new HttpOutboundHandler(this.proxyServer);
-    }
+    @Resource
+    private HeaderHttpRequestFilter requestFilter;
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
