@@ -4,41 +4,37 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
+import io.sleet.gateway.client.HttpAsyncClient;
 import io.sleet.gateway.config.AppConfiguration;
 import io.sleet.gateway.fillter.HeaderHttpRequestFilter;
 import io.sleet.gateway.fillter.HeaderHttpResponseFilter;
 import io.sleet.gateway.router.strategy.HttpEndPointRouterChoose;
 import io.sleet.gateway.router.strategy.HttpEndPointRouterStrategy;
+import io.sleet.gateway.thread.HttpThreadPoolExecutor;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
-import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
 
 /**
- * @description 请求出站处理器
  * @author sleet
+ * @description 请求出站处理器
  */
 @Component
+@Slf4j
 public class HttpOutboundHandler {
 
-    private ExecutorService proxyService;
-
-    private CloseableHttpAsyncClient httpAsyncClient;
+    @Resource
+    private HttpAsyncClient httpAsyncClient;
 
     @Resource
     private AppConfiguration appConfiguration;
@@ -53,26 +49,6 @@ public class HttpOutboundHandler {
     private HttpEndPointRouterChoose httpEndPointRouterChoose;
 
     public HttpOutboundHandler() {
-
-        int cores = Runtime.getRuntime().availableProcessors();
-        long keepAliveTime = 1000;
-        int queueSize = 1024;
-        proxyService = new ThreadPoolExecutor(
-                cores, queueSize, keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(queueSize));
-
-        IOReactorConfig reactorConfig = IOReactorConfig.custom()
-                .setConnectTimeout(1000)
-                .setSoTimeout(1000)
-                .setIoThreadCount(cores)
-                .setRcvBufSize(32 * 1024)
-                .build();
-
-        httpAsyncClient = HttpAsyncClients.custom()
-                .setMaxConnPerRoute(8)
-                .setDefaultIOReactorConfig(reactorConfig)
-                .setKeepAliveStrategy((response, context) -> 6000)
-                .build();
-        httpAsyncClient.start();
     }
 
     public void handler(final FullHttpRequest fullRequest, final ChannelHandlerContext ctx) {
@@ -81,14 +57,14 @@ public class HttpOutboundHandler {
         String backedUrl = httpEndPointRouterStrategy.router(urlList);
         String url = backedUrl + fullRequest.uri();
         requestFilter.filter(fullRequest, ctx);
-        proxyService.submit(() -> fetchGet(fullRequest, ctx, url));
+        HttpThreadPoolExecutor.executor().submit(() -> fetchGet(fullRequest, ctx, url));
     }
 
     private void fetchGet(final FullHttpRequest fullRequest, final ChannelHandlerContext ctx, final String url) {
         HttpGet httpGet = new HttpGet(url);
         httpGet.setHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
         httpGet.setHeader("name", "sleet");
-        httpAsyncClient.execute(httpGet, new FutureCallback<HttpResponse>() {
+        httpAsyncClient.initializer().execute(httpGet, new FutureCallback<HttpResponse>() {
             @Override
             public void completed(HttpResponse response) {
                 try {

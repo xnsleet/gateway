@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * @description 权重路由
  * @author sleet
+ * @description 权重路由
  */
 @Component
 public class HttpEndPointWeightRouter

@@ -16,7 +16,7 @@ netty:
 router:
   #策略：random(随机)&weight(权重)
   choose:
-    type: weight
+    type: random
   #权重路由配置
   weight:
     #权重比例，英文逗号分割

@@ -7,15 +7,15 @@ import io.netty.util.ReferenceCountUtil;
 import io.sleet.gateway.outbound.HttpOutboundHandler;
 
 /**
- * @description 请求入站处理器
  * @author sleet
+ * @description 请求入站处理器
  */
 public class HttpInboundHandler
         extends ChannelInboundHandlerAdapter {
 
     private HttpOutboundHandler outboundHandler;
 
-    public HttpInboundHandler(HttpOutboundHandler outboundHandler){
+    public HttpInboundHandler(HttpOutboundHandler outboundHandler) {
         this.outboundHandler = outboundHandler;
     }
 
@@ -27,8 +27,7 @@ public class HttpInboundHandler
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
-            FullHttpRequest fullHttpRequest = (FullHttpRequest) msg;
-            outboundHandler.handler(fullHttpRequest,ctx);
+            outboundHandler.handler((FullHttpRequest) msg, ctx);
         } finally {
             ReferenceCountUtil.release(msg);
         }

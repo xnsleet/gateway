@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * @description 随机路由
  * @author sleet
+ * @description 随机路由
  */
 @Component
 public class HttpEndPointRandomRouter

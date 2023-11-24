@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * @description 权重路由配置
  * @author sleet
  * @date 2023-11-24 10:28
+ * @description 权重路由配置
  */
 @Component
 public class AppConfiguration {
