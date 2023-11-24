@@ -8,18 +8,20 @@ import io.sleet.gateway.client.HttpAsyncClient;
 import io.sleet.gateway.config.AppConfiguration;
 import io.sleet.gateway.fillter.HeaderHttpRequestFilter;
 import io.sleet.gateway.fillter.HeaderHttpResponseFilter;
+import io.sleet.gateway.request.strategy.HttpRequestClientChoose;
 import io.sleet.gateway.router.strategy.HttpEndPointRouterChoose;
 import io.sleet.gateway.router.strategy.HttpEndPointRouterStrategy;
 import io.sleet.gateway.thread.HttpThreadPoolExecutor;
 import jakarta.annotation.Resource;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -48,6 +50,9 @@ public class HttpOutboundHandler {
     @Resource
     private HttpEndPointRouterChoose httpEndPointRouterChoose;
 
+    @Resource
+    private HttpRequestClientChoose httpRequestClientChoose;
+
     public HttpOutboundHandler() {
     }
 
@@ -60,11 +65,12 @@ public class HttpOutboundHandler {
         HttpThreadPoolExecutor.executor().submit(() -> fetchGet(fullRequest, ctx, url));
     }
 
+    @SneakyThrows
     private void fetchGet(final FullHttpRequest fullRequest, final ChannelHandlerContext ctx, final String url) {
-        HttpGet httpGet = new HttpGet(url);
-        httpGet.setHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-        httpGet.setHeader("name", "sleet");
-        httpAsyncClient.initializer().execute(httpGet, new FutureCallback<HttpResponse>() {
+        HttpRequestBase client = httpRequestClientChoose.choose(fullRequest.method().name()).getClient(fullRequest);
+        client.setURI(new URI(url));
+        client.setHeader("name", "sleet");
+        httpAsyncClient.initializer().execute(client, new FutureCallback<HttpResponse>() {
             @Override
             public void completed(HttpResponse response) {
                 try {
@@ -76,13 +82,13 @@ public class HttpOutboundHandler {
 
             @Override
             public void failed(Exception ex) {
-                httpGet.abort();
+                client.abort();
                 ex.printStackTrace();
             }
 
             @Override
             public void cancelled() {
-                httpGet.abort();
+                client.abort();
             }
         });
     }
