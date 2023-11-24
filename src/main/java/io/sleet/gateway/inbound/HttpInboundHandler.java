@@ -4,20 +4,16 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.ReferenceCountUtil;
-import io.sleet.gateway.fillter.HeaderHttpRequestFilter;
 import io.sleet.gateway.outbound.HttpOutboundHandler;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Component;
 
 /**
- * 请求入站处理器
+ * @description 请求入站处理器
+ * @author sleet
  */
 public class HttpInboundHandler
         extends ChannelInboundHandlerAdapter {
 
     private HttpOutboundHandler outboundHandler;
-
-    private HeaderHttpRequestFilter requestFilter = new HeaderHttpRequestFilter();
 
     public HttpInboundHandler(HttpOutboundHandler outboundHandler){
         this.outboundHandler = outboundHandler;
@@ -32,7 +28,7 @@ public class HttpInboundHandler
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
             FullHttpRequest fullHttpRequest = (FullHttpRequest) msg;
-            outboundHandler.handler(fullHttpRequest,ctx,requestFilter);
+            outboundHandler.handler(fullHttpRequest,ctx);
         } finally {
             ReferenceCountUtil.release(msg);
         }

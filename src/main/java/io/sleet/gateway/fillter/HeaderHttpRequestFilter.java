@@ -5,7 +5,8 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import org.springframework.stereotype.Component;
 
 /**
- * 请求过滤器
+ * @description 请求过滤器
+ * @author sleet
  */
 @Component
 public class HeaderHttpRequestFilter

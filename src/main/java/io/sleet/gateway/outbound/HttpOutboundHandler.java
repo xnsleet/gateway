@@ -4,10 +4,11 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
+import io.sleet.gateway.config.AppConfiguration;
+import io.sleet.gateway.fillter.HeaderHttpRequestFilter;
 import io.sleet.gateway.fillter.HeaderHttpResponseFilter;
-import io.sleet.gateway.fillter.HttpRequestFilter;
-import io.sleet.gateway.router.HttpEndPointRouterChoose;
-import io.sleet.gateway.router.HttpEndPointRouterStrategy;
+import io.sleet.gateway.router.strategy.HttpEndPointRouterChoose;
+import io.sleet.gateway.router.strategy.HttpEndPointRouterStrategy;
 import jakarta.annotation.Resource;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -17,14 +18,10 @@ import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -33,20 +30,21 @@ import java.util.concurrent.TimeUnit;
 import static io.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
 
 /**
- * 请求出站处理器
+ * @description 请求出站处理器
+ * @author sleet
  */
 @Component
 public class HttpOutboundHandler {
 
-    @Value("${proxy.servers}")
-    private String proxyServers;
-
-    @Value("${router.choose.type}")
-    private String routerChooseType;
-
     private ExecutorService proxyService;
 
     private CloseableHttpAsyncClient httpAsyncClient;
+
+    @Resource
+    private AppConfiguration appConfiguration;
+
+    @Resource
+    private HeaderHttpRequestFilter requestFilter;
 
     @Resource
     private HeaderHttpResponseFilter responseFilter;
@@ -77,9 +75,9 @@ public class HttpOutboundHandler {
         httpAsyncClient.start();
     }
 
-    public void handler(final FullHttpRequest fullRequest, final ChannelHandlerContext ctx, HttpRequestFilter requestFilter) {
-        List<String> urlList = Arrays.asList(proxyServers.split(","));
-        HttpEndPointRouterStrategy httpEndPointRouterStrategy = httpEndPointRouterChoose.choose(routerChooseType);
+    public void handler(final FullHttpRequest fullRequest, final ChannelHandlerContext ctx) {
+        List<String> urlList = Arrays.asList(appConfiguration.proxyServers.split(","));
+        HttpEndPointRouterStrategy httpEndPointRouterStrategy = httpEndPointRouterChoose.choose(appConfiguration.routerChooseType);
         String backedUrl = httpEndPointRouterStrategy.router(urlList);
         String url = backedUrl + fullRequest.uri();
         requestFilter.filter(fullRequest, ctx);

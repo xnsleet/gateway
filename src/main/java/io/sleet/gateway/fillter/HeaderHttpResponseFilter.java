@@ -4,7 +4,8 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import org.springframework.stereotype.Component;
 
 /**
- * 响应过滤器
+ * @description 响应过滤器
+ * @author sleet
  */
 @Component
 public class HeaderHttpResponseFilter

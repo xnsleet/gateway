@@ -9,10 +9,9 @@ import io.sleet.gateway.outbound.HttpOutboundHandler;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
-import java.lang.ref.PhantomReference;
-
 /**
- * 请求入站初始化
+ * @author sleet
+ * @description 请求入站初始化
  */
 @Component
 public class HttpInboundInitializer
@@ -20,7 +19,6 @@ public class HttpInboundInitializer
 
     @Resource
     private HttpOutboundHandler httpOutboundHandler;
-
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {

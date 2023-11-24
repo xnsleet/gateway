@@ -8,40 +8,29 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.sleet.gateway.config.AppConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.util.Properties;
-
 /**
- * 服务启动器
+ * @description 服务启动器
+ * @author sleet
  */
 @Component
 public class HttpInboundServer{
 
-    @Value("${netty.group.boss}")
-    public int bossGroupNum;
-
-    @Value("${netty.group.worker}")
-    public int workerGroupNum;
-
-    @Value("${server.port}")
-    public int serverPort;
+    @Resource
+    private HttpInboundInitializer httpInboundInitializer;
 
     @Resource
-    HttpInboundInitializer httpInboundInitializer;
+    private AppConfiguration appConfiguration;
 
     @PostConstruct
     public void init() throws BeansException {
-        NioEventLoopGroup bossGroup = new NioEventLoopGroup(bossGroupNum);
-        NioEventLoopGroup workerGroup = new NioEventLoopGroup(workerGroupNum);
+        NioEventLoopGroup bossGroup = new NioEventLoopGroup(appConfiguration.nettyGroupBoss);
+        NioEventLoopGroup workerGroup = new NioEventLoopGroup(appConfiguration.nettyGroupWorker);
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.option(ChannelOption.SO_BACKLOG, 128)
@@ -57,7 +46,7 @@ public class HttpInboundServer{
                     .handler(new LoggingHandler(LogLevel.DEBUG))
                     .childHandler(httpInboundInitializer);
 
-            Channel channel = bootstrap.bind(serverPort).sync().channel();
+            Channel channel = bootstrap.bind(appConfiguration.serverPort).sync().channel();
             channel.closeFuture().sync();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

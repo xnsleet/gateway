@@ -1,8 +1,8 @@
 package io.sleet.gateway.constans;
 
 /**
+ * @description 路由常量
  * @author sleet
- * @date 2023年11月23日 16:04
  */
 public class RouterConstants {
 

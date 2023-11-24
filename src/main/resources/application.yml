@@ -1,15 +1,25 @@
+#服务端口号
 server:
   port: 8888
 
+#服务出口ip地址，以英文逗号分割
 proxy:
   servers: http://localhost:8801,http://localhost:8802,http://localhost:8803
-  weight: 3,2,1
 
+#netty配置
 netty:
   group:
     boss: 1
     worker: 16
 
+#路由配置
 router:
+  #策略：random(随机)&weight(权重)
   choose:
     type: weight
+  #权重路由配置
+  weight:
+    #权重比例，英文逗号分割
+    proportion: 3,2,1
+    #权重开关 0.关闭 1.开启
+    switch: 1
