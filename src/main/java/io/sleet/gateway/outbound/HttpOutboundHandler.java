@@ -67,9 +67,7 @@ public class HttpOutboundHandler {
 
     @SneakyThrows
     private void fetchGet(final FullHttpRequest fullRequest, final ChannelHandlerContext ctx, final String url) {
-        HttpRequestBase client = httpRequestClientChoose.choose(fullRequest.method().name()).getClient(fullRequest);
-        client.setURI(new URI(url));
-        client.setHeader("name", "sleet");
+        HttpRequestBase client = httpRequestClientChoose.choose(fullRequest.method().name()).getClient(fullRequest,url);
         httpAsyncClient.initializer().execute(client, new FutureCallback<HttpResponse>() {
             @Override
             public void completed(HttpResponse response) {

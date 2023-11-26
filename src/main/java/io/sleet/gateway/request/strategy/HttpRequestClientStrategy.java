@@ -7,5 +7,5 @@ public interface HttpRequestClientStrategy {
 
     String type();
 
-    HttpRequestBase getClient(FullHttpRequest request);
+    HttpRequestBase getClient(FullHttpRequest request, String url);
 }

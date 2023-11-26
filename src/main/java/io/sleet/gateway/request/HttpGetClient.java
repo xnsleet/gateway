@@ -23,8 +23,8 @@ public class HttpGetClient
     }
 
     @Override
-    public HttpRequestBase getClient(FullHttpRequest request) {
-        HttpGet httpGet = new HttpGet();
+    public HttpRequestBase getClient(FullHttpRequest request, String url) {
+        HttpGet httpGet = new HttpGet(url);
         httpGet.setHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
         return httpGet;
     }
