@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HttpPostClient
         implements HttpRequestClientStrategy {
+
     @Override
     public String type() {
         return RequestConstants.POST;

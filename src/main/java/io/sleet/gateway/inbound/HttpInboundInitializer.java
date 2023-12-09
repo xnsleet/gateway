@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.sleet.gateway.outbound.HttpOutboundHandler;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,11 +15,11 @@ import org.springframework.stereotype.Component;
  * @description 请求入站初始化
  */
 @Component
+@RequiredArgsConstructor
 public class HttpInboundInitializer
         extends ChannelInitializer<SocketChannel> {
 
-    @Resource
-    private HttpOutboundHandler httpOutboundHandler;
+    private final HttpOutboundHandler httpOutboundHandler;
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {

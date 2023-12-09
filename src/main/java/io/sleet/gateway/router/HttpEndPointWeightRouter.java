@@ -4,6 +4,7 @@ import io.sleet.gateway.constans.RouterConstants;
 import io.sleet.gateway.router.strategy.HttpEndPointRouterStrategy;
 import io.sleet.gateway.config.AppConfiguration;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -16,11 +17,11 @@ import java.util.Random;
  * @description 权重路由
  */
 @Component
+@RequiredArgsConstructor
 public class HttpEndPointWeightRouter
         implements HttpEndPointRouterStrategy {
 
-    @Resource
-    private AppConfiguration appConfiguration;
+    private final AppConfiguration appConfiguration;
 
     @Override
     public String type() {

@@ -12,7 +12,7 @@ import io.sleet.gateway.request.strategy.HttpRequestClientChoose;
 import io.sleet.gateway.router.strategy.HttpEndPointRouterChoose;
 import io.sleet.gateway.router.strategy.HttpEndPointRouterStrategy;
 import io.sleet.gateway.thread.HttpThreadPoolExecutor;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
@@ -21,7 +21,6 @@ import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,28 +32,15 @@ import static io.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class HttpOutboundHandler {
 
-    @Resource
-    private HttpAsyncClient httpAsyncClient;
-
-    @Resource
-    private AppConfiguration appConfiguration;
-
-    @Resource
-    private HeaderHttpRequestFilter requestFilter;
-
-    @Resource
-    private HeaderHttpResponseFilter responseFilter;
-
-    @Resource
-    private HttpEndPointRouterChoose httpEndPointRouterChoose;
-
-    @Resource
-    private HttpRequestClientChoose httpRequestClientChoose;
-
-    public HttpOutboundHandler() {
-    }
+    private final HttpAsyncClient httpAsyncClient;
+    private final AppConfiguration appConfiguration;
+    private final HeaderHttpRequestFilter requestFilter;
+    private final HeaderHttpResponseFilter responseFilter;
+    private final HttpEndPointRouterChoose httpEndPointRouterChoose;
+    private final HttpRequestClientChoose httpRequestClientChoose;
 
     public void handler(final FullHttpRequest fullRequest, final ChannelHandlerContext ctx) {
         List<String> urlList = Arrays.asList(appConfiguration.proxyServers.split(","));

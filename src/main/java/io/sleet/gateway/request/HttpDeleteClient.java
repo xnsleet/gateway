@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HttpDeleteClient
         implements HttpRequestClientStrategy {
+
     @Override
     public String type() {
         return RequestConstants.DELETE;

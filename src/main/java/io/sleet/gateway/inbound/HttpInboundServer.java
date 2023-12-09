@@ -11,21 +11,21 @@ import io.netty.handler.logging.LoggingHandler;
 import io.sleet.gateway.config.AppConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeansException;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * @author sleet
  * @description 服务启动器
  */
-@Component
+@Service
+@RequiredArgsConstructor
 public class HttpInboundServer{
 
-    @Resource
-    private HttpInboundInitializer httpInboundInitializer;
-
-    @Resource
-    private AppConfiguration appConfiguration;
+    private final HttpInboundInitializer httpInboundInitializer;
+    private final AppConfiguration appConfiguration;
 
     @PostConstruct
     public void init() throws BeansException {

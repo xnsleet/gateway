@@ -13,7 +13,7 @@ import io.sleet.gateway.outbound.HttpOutboundHandler;
 public class HttpInboundHandler
         extends ChannelInboundHandlerAdapter {
 
-    private HttpOutboundHandler outboundHandler;
+    private final HttpOutboundHandler outboundHandler;
 
     public HttpInboundHandler(HttpOutboundHandler outboundHandler) {
         this.outboundHandler = outboundHandler;
